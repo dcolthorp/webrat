@@ -95,7 +95,9 @@ module Webrat
       @element["action"].blank? ? @session.current_url : @element["action"]
     end
 
-    HASH = [Hash, HashWithIndifferentAccess] rescue [Hash]
+    HASH = [Hash]
+    HASH << HashWithIndifferentAccess rescue nil  # Rails
+    HASH << Mash rescue nil                       # Merb
     
     def merge(all_params, new_param)
       new_param.each do |key, value|
@@ -114,7 +116,7 @@ module Webrat
       a.keys.each do |k|
         if b.has_key?(k)
           case [a[k], b[k]].map{|value| value.class}
-          when [Hash, Hash]
+          when *HASH.zip(HASH)
             a[k] = merge_hash_values(a[k], b[k])
             b.delete(k)
           when [Array, Array]
